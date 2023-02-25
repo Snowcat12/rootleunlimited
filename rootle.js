@@ -36,10 +36,59 @@ function intialize() {
         }
     }
 
+    // Create the key board
+    let keyboard = [
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L", " "],
+        ["Enter", "Z", "X", "C", "V", "B", "N", "M", "⌫" ]
+    ]
+
+    for (let i = 0; i < keyboard.length; i++) {
+        let currRow = keyboard[i];
+        let keyboardRow = document.createElement("div");
+        keyboardRow.classList.add("keyboard-row");
+
+        for (let j = 0; j < currRow.length; j++) {
+            let keyTile = document.createElement("div");
+
+            let key = currRow[j];
+            keyTile.innerText = key;
+            if (key == "Enter") {
+                keyTile.id = "Enter";
+            }
+            else if (key == "⌫") {
+                keyTile.id = "Backspace";
+            }
+            else if ("A" <= key && key <= "Z") {
+                keyTile.id = "Key" + key;
+            }
+
+            keyTile.addEventListener("click", processKey);
+
+            if (key == "Enter") {
+                keyTile.classList.add("enter-key-tile");
+            } else {
+                keyTile.classList.add("key-tile");
+            }
+            keyboardRow.appendChild(keyTile);
+        }
+        document.body.appendChild(keyboardRow)
+    }
     
     // Listen for Key Press
     document.addEventListener("keyup", (e) => {
-        if (gameOver) return;
+        processInput(e);
+    })
+}
+
+function processKey() {
+    let e = {"code" : this.id};
+    processInput(e);
+}
+
+
+function processInput(e) {
+    if (gameOver) return;
 
         // alert(e.code);
         if ("KeyA" <= e.code && e.code <= "KeyZ") {
@@ -66,13 +115,10 @@ function intialize() {
 
         if (!gameOver && row == height) {
             gameOver = true;
-            console.log("failed");
             document.getElementById("answer").innerText = word;
         }
 
-    })
 }
-
 
 function update() {
     let guess = "";
@@ -111,13 +157,17 @@ function update() {
         //Is it in the correct position?
         if (word[c] == letter) {
             currTile.classList.add("correct");
+
+            let keyTile = document.getElementById("Key" + letter);
+            keyTile.classList.remove("present");
+            keyTile.classList.add("correct");
+
             correct += 1;
             letterCount[letter] -= 1;
         }
 
         if (correct == width) {
             gameOver = true;
-            console.log("succeeded at row " + (row + 1).toString());
         }
 
     }
@@ -129,10 +179,16 @@ function update() {
         if (!currTile.classList.contains("correct")) {
             if (word.includes(letter) && letterCount[letter] > 0) {
                 currTile.classList.add("present");
+                let keyTile = document.getElementById("Key" + letter);
+                if (!keyTile.classList.contains("correct")) {
+                    keyTile.classList.add("present");
+                }
                 letterCount[letter] -= 1;
             }
             else {
                 currTile.classList.add("absent");
+                let keyTile = document.getElementById("Key" + letter);
+                keyTile.classList.add("absent");
             }
         } 
     }
